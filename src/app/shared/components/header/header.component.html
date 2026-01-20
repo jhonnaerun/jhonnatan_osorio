@@ -1,0 +1,66 @@
+<div class="navbar bg-base-100 shadow-md px-4">
+  <!-- Left -->
+  <div class="navbar-start">
+    <button class="btn btn-ghost lg:hidden">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+    <a class="btn btn-ghost text-xl font-bold">
+      MyApp
+    </a>
+  </div>
+
+  <!-- Center (desktop) -->
+  <div class="navbar-center hidden lg:flex">
+    <ul class="menu menu-horizontal px-1 gap-2">
+      <li><a routerLink="/home">Home</a></li>
+      <li><a routerLink="/projects">Projects</a></li>
+      <li><a routerLink="/about">About</a></li>
+    </ul>
+  </div>
+
+  <!-- Right -->
+  <div class="navbar-end gap-2">
+    <button class="btn btn-ghost btn-circle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-5 w-5"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z" />
+      </svg>
+    </button>
+
+    <div class="dropdown dropdown-end">
+      <label tabindex="0" class="btn btn-circle avatar">
+        <div class="w-10 rounded-full">
+          <img src="https://i.pravatar.cc/40" />
+        </div>
+      </label>
+      <ul
+        tabindex="0"
+        class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+        <li><a>Profile</a></li>
+        <li><a>Settings</a></li>
+        <li><a>Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
