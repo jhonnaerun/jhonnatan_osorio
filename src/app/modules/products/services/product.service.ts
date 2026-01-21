@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { delay, lastValueFrom, map } from 'rxjs';
+import { catchError, delay, lastValueFrom, map, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { Product } from '@Products/models/product.model';
 import { ResponseData } from '@Core/models/response.model';
@@ -20,9 +20,21 @@ export class ProductService {
     return lastValueFrom(observable.pipe(delay(1000),map(response => response.data as Product[])));
   }
 
+  public getProduct(id: string): Promise<Product | null> {
+    const observable = this.http.get<Product>(`${this.url}/bp/products/${id}`);
+
+    return lastValueFrom(observable.pipe(catchError(() => of(null))));
+  }
+
   public createProduct(product: Product): Promise<ResponseData> {
     product.id = uuidv4();
     const observable = this.http.post<ResponseData>(`${this.url}/bp/products`, product);
+
+    return lastValueFrom(observable.pipe(delay(1000)));
+  }
+
+  public updateProduct(product: Product): Promise<ResponseData> {
+    const observable = this.http.put<ResponseData>(`${this.url}/bp/products/${product.id}`, product);
 
     return lastValueFrom(observable.pipe(delay(1000)));
   }

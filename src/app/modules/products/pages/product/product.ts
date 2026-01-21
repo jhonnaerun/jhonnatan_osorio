@@ -3,24 +3,29 @@ import { FormBuilder, ReactiveFormsModule, UntypedFormGroup, Validators} from '@
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProductService } from '@Products/services/product.service';
 import { FieldErrorComponent } from '@Shared/components/field-error/field-error.component';
-import { injectMutation } from '@tanstack/angular-query-experimental';
+import { injectMutation, injectQuery } from '@tanstack/angular-query-experimental';
+import { Product } from '@Products/models/product.model';
+import { ToastController } from '@Core/controllers/toast-controller';
+import { BackNavigateComponent } from '@Shared/components/back-navigate/back-navigate.component';
 
 @Component({
-  selector: 'app-product',
   imports: [
     ReactiveFormsModule,
-    FieldErrorComponent
+    FieldErrorComponent,
+    BackNavigateComponent
   ],
-  templateUrl: './product.html',
-  styleUrl: './product.css',
+  templateUrl: './product.html'
 })
-export default class Product {
+export default class ProductComponent {
   private fb = inject(FormBuilder);
-  private productSeervice = inject(ProductService);
+  private productService = inject(ProductService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastController);
 
-  private id = signal(this.route.snapshot.paramMap.get('id'));
+  public id = signal(this.route.snapshot.paramMap.get('id'));
+
+  public title = !!this.id() ? 'Actualizar' : 'Registrar';
 
   public today = new Date().toISOString().split('T')[0];
 
@@ -33,21 +38,55 @@ export default class Product {
     date_revision: [{value: '', disabled: true}, Validators.required]
   });
 
+  product = injectQuery<Product | null>(() => ({
+    queryKey: ['product', this.id()],
+    queryFn: async ({ queryKey }) => {
+      const [, id] = queryKey as [string, string];
+      const product = await this.productService.getProduct(id);
+
+      !product ? this.Error() : this.setForm(product);
+
+      return product;
+    },
+    enabled: !!this.id(),
+    retry: false
+  }));
+
   private change = this.form.get('date_release')?.valueChanges.subscribe((value: Date) => {
     const revision = new Date(value);
-    console.log(this.id());
     revision.setFullYear(revision.getFullYear() + 1);
     this.form.get('date_revision')?.setValue(revision.toISOString().split('T')[0])
   });
 
   create = injectMutation(() => ({
-    mutationFn: () => this.productSeervice.createProduct(this.form.getRawValue()),
-    onSuccess: () => this.router.navigate(['/products'])
+    mutationFn: () => this.productService.createProduct(this.form.getRawValue()),
+    onSuccess: () => {
+      console.log('ddsdsd');
+      this.toast.show('Producto creado correctamente.');
+      this.router.navigate(['/products']);
+    },
+  }));
+
+  update = injectMutation(() => ({
+    mutationFn: () => this.productService.updateProduct(this.form.getRawValue()),
+    onSuccess: () => {
+      this.toast.show('Producto actualizado correctamente.');
+      this.router.navigate(['/products']);
+    },
   }));
 
   public handleNext(): void {
-    if(this.create.isPending()) return;
-    this.create.mutate();
+    if(this.create.isPending() || this.update.isPending()) return;
+    !!this.id() ? this.update.mutate() : this.create.mutate();
+  }
+
+  private setForm(product: Product): void {
+    this.form.setValue(product);
+  }
+
+  private Error(): void {
+    this.toast.show('El id ingresado no existe.', 'error');
+    this.router.navigate(['/products']);
   }
 
 }

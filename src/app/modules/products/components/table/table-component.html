@@ -1,0 +1,163 @@
+<div class="hidden md:block overflow-x-auto relative">
+
+  <table class="table table-zebra w-full table-fixed">
+
+    <thead>
+      <tr>
+        <th class="w-16">Logo</th>
+        <th class="w-40">Producto</th>
+        <th class="w-72">Descripción</th>
+        <th class="w-40">Fecha de liberación</th>
+        <th class="w-44">Fecha de reestructuración</th>
+
+        <!-- ACCIONES STICKY -->
+        <th
+          class="w-32 sticky right-0 bg-base-200 text-center z-20"
+        >
+          Acciones
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (p of products(); track $index) {
+      <tr>
+
+        <td>
+          <div class="avatar">
+            <div class="w-10 rounded">
+              <img [src]="p.logo" />
+            </div>
+          </div>
+        </td>
+
+        <td class="truncate font-medium">
+          {{ p.name }}
+        </td>
+
+        <td class="truncate">
+          {{ p.description }}
+        </td>
+
+        <td class="truncate">
+          {{ p.date_release }}
+        </td>
+
+        <td class="truncate">
+          {{ p.date_revision }}
+        </td>
+
+        <!-- ACCIONES STICKY -->
+        <td
+          class="sticky right-0 bg-base-100 z-10"
+        >
+          <div class="flex justify-center gap-4">
+            <div class="cursor-pointer" (click)="router.navigate([`/products/product/${p.id}`])">
+              <ng-icon name="heroPencil" />
+            </div>
+
+            <div class="text-red-500 cursor-pointer" (click)="openDeleteModal(p)">
+              @if(deleteProduct.isPending() && p.id === selectedProduct?.id) {
+                <span class="loading loading-spinner loading-xs"></span>
+                } @else {
+                <ng-icon name="heroTrash" />
+                }
+            </div>
+          </div>
+        </td>
+
+      </tr>
+      } @empty {
+      <tr>
+        <td colspan="6" class="text-center text-gray-500 py-6">
+          No existen productos disponibles
+        </td>
+      </tr>
+      }
+    </tbody>
+
+  </table>
+</div>
+
+<!-- CARDS MOBILE -->
+<div class="md:hidden space-y-4">
+
+  @for (p of products(); track $index) {
+  <div class="card bg-base-100 shadow">
+
+    <div class="card-body space-y-3">
+
+      <!-- Header -->
+      <div class="flex items-center gap-4">
+        <div class="avatar">
+          <div class="w-12 rounded">
+            <img [src]="p.logo" />
+          </div>
+        </div>
+
+        <div>
+          <h2 class="font-bold text-lg">{{ p.name }}</h2>
+          <p class="text-sm text-gray-500">
+            {{ p.date_release }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <p class="text-sm text-gray-600">
+        {{ p.description }}
+      </p>
+
+      <!-- Dates -->
+      <div class="text-sm">
+        <p>
+          <span class="font-medium">Liberación:</span>
+          {{ p.date_release }}
+        </p>
+        <p>
+          <span class="font-medium">Reestructuración:</span>
+          {{ p.date_revision }}
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-4 pt-2">
+        <button class="btn btn-sm btn-outline" (click)="router.navigate([`/products/product/${p.id}`])">
+          <ng-icon name="heroPencil" />
+        </button>
+
+        <button class="btn btn-sm btn-outline btn-error" (click)="openDeleteModal(p)">
+          @if(deleteProduct.isPending() && p.id === selectedProduct?.id) {
+            <span class="loading loading-spinner loading-xs"></span>
+            } @else {
+            <ng-icon name="heroTrash" />
+            }
+        </button>
+      </div>
+
+    </div>
+  </div>
+  }
+
+  @empty {
+  <div class="text-center text-gray-500 mt-6">
+    No existen productos disponibles
+  </div>
+  }
+
+</div>
+
+
+<dialog #my_modal class="modal">
+  <div class="modal-box">
+    <p class="py-4">¿Estas seguro de eliminar el producto {{selectedProduct?.name}}?</p>
+    <div class="modal-action">
+      <form method="dialog" class="flex gap-4">
+        <button class="btn btn-soft">Cancelar</button>
+        <button class="btn btn-warning" (click)="nextDelete()">
+          <ng-icon name="heroTrash" />
+          Confirmar
+        </button>
+      </form>
+    </div>
+  </div>
+</dialog>

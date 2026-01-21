@@ -1,1 +1,13 @@
 <router-outlet />
+
+@if(!toast.hiden()) {
+<div class="toast toast-end">
+  <div class="alert" [ngClass]="{
+      'alert-success': toast.type() === 'success',
+      'alert-error': toast.type() === 'error',
+      'alert-warning': toast.type() === 'warning'
+    }">
+    <span class="text-base-100">{{toast.message()}}</span>
+  </div>
+</div>
+}

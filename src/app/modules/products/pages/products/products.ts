@@ -1,64 +1,45 @@
-import { Component, ElementRef, inject, viewChild } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { HeaderComponent } from '@Shared/components/header/header.component';
-import { heroMagnifyingGlass, heroPencil, heroPlus, heroTrash } from '@ng-icons/heroicons/outline';
+import { heroMagnifyingGlass, heroPlus } from '@ng-icons/heroicons/outline';
 import { ProductService } from '@Products/services/product.service';
-import { injectMutation, injectQuery, QueryClient } from '@tanstack/angular-query-experimental';
-import { Product } from '@Products/models/product.model';
+import { injectQuery } from '@tanstack/angular-query-experimental';
 import { GET_PRODUCTS } from '@Core/constants/query-keys';
 import { Router } from '@angular/router';
+import { SkeletonTableComponent } from '@Products/components/skeleton-table/skeleton-table.component';
+import { TableComponent } from '@Products/components/table/table-component';
 
 @Component({
   selector: 'app-products',
   imports: [
+    NgIcon,
     HeaderComponent,
-    NgIcon
+    SkeletonTableComponent,
+    TableComponent
   ],
-  providers: provideIcons({heroMagnifyingGlass, heroPlus, heroPencil, heroTrash}),
-  templateUrl: './products.html',
-  styleUrl: './products.css',
+  providers: provideIcons({heroPlus, heroMagnifyingGlass}),
+  templateUrl: './products.html'
 })
-export default class Products {
+export default class ProductsComponent {
   private productService = inject(ProductService);
-  private queryClient = inject(QueryClient);
   public router = inject(Router);
 
-  private deleteModal = viewChild<ElementRef<HTMLDialogElement>>('my_modal');
-  private toastDelete = viewChild<ElementRef<HTMLDivElement>>('toastDelete');
-  public selectedProduct: Product | undefined;
+  search = signal('');
 
   products = injectQuery(() => ({
     queryKey: [GET_PRODUCTS],
     queryFn: () => this.productService.getProducts()
   }));
 
-  deleteProduct = injectMutation(() => ({
-    mutationFn: (id: string) => this.productService.deleteProduct(id),
-    onSuccess: () => {
-      this.queryClient.invalidateQueries({queryKey: [GET_PRODUCTS]});
-      this.showToast();
-    },
-  }));
+  filteredProducts = computed(() => {
+    const term = this.search().toLowerCase();
 
-  public openDeleteModal(product: Product):void {
-    this.selectedProduct = product;
-    const modal = this.deleteModal()?.nativeElement;
-    modal?.showModal();
-  }
+    if (!term) return this.products.data() ?? [];
 
-  public nextDelete():void {
-    this.deleteProduct.mutate(this.selectedProduct!.id);
-  }
-
-  private showToast():void {
-    const toast = this.toastDelete()?.nativeElement;
-    toast?.classList.remove('hidden');
-
-    setTimeout(() => {
-      toast?.classList.add('hidden');
-    }, 3000);
-  }
-
-
+    return (this.products.data() ?? []).filter(p =>
+      p.name.toLowerCase().includes(term) ||
+      p.description.toLowerCase().includes(term)
+    );
+  });
 
 }
