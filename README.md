@@ -24,3 +24,11 @@ After that, install the frontend dependencies and start the development server:
 
 npm i
 ng s -o
+
+
+
+
+repository project
+
+
+https://github.com/jhonnaerun/jhonnatan_osorio
